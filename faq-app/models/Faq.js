@@ -2,11 +2,10 @@ const mongoose = require("mongoose");
 
 const FaqSchema = new mongoose.Schema({
   question: { type: String, required: true },
-  answer: { type: String, required: true }, // Supports rich text (HTML)
+  answer: { type: String, required: true }, // Stores HTML content
   translations: {
     question_hi: { type: String },
     question_bn: { type: String },
-  
   },
 });
 

@@ -13,7 +13,7 @@ router.get("/", async (req, res) => {
       faqs = faqs.map(faq => ({
         _id: faq._id,
         question: faq.getTranslatedQuestion(lang),
-        answer: faq.answer,
+        answer: faq.answer, // Rich text answer
       }));
     }
 
@@ -23,7 +23,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Add a new FAQ
+// Add a new FAQ with a formatted answer
 router.post("/", async (req, res) => {
   try {
     const { question, answer, translations } = req.body;
@@ -36,3 +36,4 @@ router.post("/", async (req, res) => {
 });
 
 module.exports = router;
+ 
