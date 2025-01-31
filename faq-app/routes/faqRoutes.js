@@ -3,31 +3,37 @@ const Faq = require("../models/Faq");
 
 const router = express.Router();
 
-// Get all FAQs (with optional translation)
+// 📌 GET All FAQs with language support
 router.get("/", async (req, res) => {
   try {
-    const { lang } = req.query;
-    let faqs = await Faq.find();
+    const { lang = "en" } = req.query; // Default to English
+    const faqs = await Faq.find();
 
-    if (lang) {
-      faqs = faqs.map(faq => ({
-        _id: faq._id,
-        question: faq.getTranslatedQuestion(lang),
-        answer: faq.answer, // Rich text answer
-      }));
-    }
+    // Pre-translate FAQs
+    const translatedFaqs = faqs.map(faq => ({
+      _id: faq._id,
+      question: faq.getTranslatedQuestion(lang),
+      answer: faq.answer,
+    }));
 
-    res.json(faqs);
+    res.json(translatedFaqs);
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-// Add a new FAQ with a formatted answer
+// 📌 POST - Add a new FAQ
 router.post("/", async (req, res) => {
   try {
     const { question, answer, translations } = req.body;
-    const newFaq = new Faq({ question, answer, translations });
+    const newFaq = new Faq({
+      question,
+      answer,
+      translations: {
+        en: question, // Default language
+        ...translations, // Other language translations
+      },
+    });
     await newFaq.save();
     res.status(201).json(newFaq);
   } catch (error) {
@@ -35,5 +41,14 @@ router.post("/", async (req, res) => {
   }
 });
 
+// 📌 DELETE - Remove FAQ
+router.delete("/:id", async (req, res) => {
+  try {
+    await Faq.findByIdAndDelete(req.params.id);
+    res.json({ message: "FAQ deleted" });
+  } catch (error) {
+    res.status(500).json({ error: "Error deleting FAQ" });
+  }
+});
+
 module.exports = router;
- 

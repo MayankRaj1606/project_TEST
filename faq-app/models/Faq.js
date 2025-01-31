@@ -2,16 +2,17 @@ const mongoose = require("mongoose");
 
 const FaqSchema = new mongoose.Schema({
   question: { type: String, required: true },
-  answer: { type: String, required: true }, // Stores HTML content
+  answer: { type: String, required: true }, // Rich text format
   translations: {
-    question_hi: { type: String },
-    question_bn: { type: String },
+    en: { type: String, required: true }, // English (default)
+    hi: { type: String }, // Hindi
+    bn: { type: String }, // Bengali
   },
 });
 
-// Method to get translated question
+// Method to get pre-translated question
 FaqSchema.methods.getTranslatedQuestion = function (lang) {
-  return this.translations[`question_${lang}`] || this.question;
+  return this.translations[lang] || this.translations.en;
 };
 
 module.exports = mongoose.model("Faq", FaqSchema);

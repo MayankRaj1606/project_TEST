@@ -8,7 +8,7 @@ const App = () => {
   const [language, setLanguage] = useState("en");
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
-  const [translations, setTranslations] = useState({});
+  const [translations, setTranslations] = useState({ hi: "", bn: "" });
 
   useEffect(() => {
     fetchFaqs();
@@ -33,6 +33,7 @@ const App = () => {
       });
       setQuestion("");
       setAnswer("");
+      setTranslations({ hi: "", bn: "" });
       fetchFaqs(); // Refresh FAQs
     } catch (error) {
       console.error("Error adding FAQ", error);
@@ -70,6 +71,21 @@ const App = () => {
           required
         />
         <ReactQuill value={answer} onChange={setAnswer} placeholder="Write answer..." />
+
+        {/* Language-Specific Translations */}
+        <input
+          type="text"
+          placeholder="Enter Hindi Translation"
+          value={translations.hi}
+          onChange={(e) => setTranslations({ ...translations, hi: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Enter Bengali Translation"
+          value={translations.bn}
+          onChange={(e) => setTranslations({ ...translations, bn: e.target.value })}
+        />
+
         <button type="submit">Add FAQ</button>
       </form>
     </div>
