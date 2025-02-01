@@ -1,15 +1,15 @@
 const express = require("express");
 const Faq = require("../models/Faq");
+const translateText = require("../utils/translate"); // Translation utility
 
 const router = express.Router();
 
 // 📌 GET All FAQs with language support
 router.get("/", async (req, res) => {
   try {
-    const { lang = "en" } = req.query; // Default to English
+    const { lang = "en" } = req.query;
     const faqs = await Faq.find();
 
-    // Pre-translate FAQs
     const translatedFaqs = faqs.map(faq => ({
       _id: faq._id,
       question: faq.getTranslatedQuestion(lang),
@@ -22,18 +22,19 @@ router.get("/", async (req, res) => {
   }
 });
 
-// 📌 POST - Add a new FAQ
+// 📌 POST - Add a new FAQ with Auto-Translation
 router.post("/", async (req, res) => {
   try {
-    const { question, answer, translations } = req.body;
-    const newFaq = new Faq({
-      question,
-      answer,
-      translations: {
-        en: question, // Default language
-        ...translations, // Other language translations
-      },
-    });
+    const { question, answer } = req.body;
+
+    // Auto-translate question
+    const translations = {
+      en: question,
+      hi: await translateText(question, "hi"),
+      bn: await translateText(question, "bn"),
+    };
+
+    const newFaq = new Faq({ question, answer, translations });
     await newFaq.save();
     res.status(201).json(newFaq);
   } catch (error) {
