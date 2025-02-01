@@ -1,33 +1,22 @@
 const express = require("express");
 const Faq = require("../models/Faq");
-const translateText = require("../utils/translate"); // Translation utility
+const auth = require("../middleware/auth");
+const translateText = require("../utils/translate");
 
 const router = express.Router();
 
-// 📌 GET All FAQs with language support
+// 📌 Get all FAQs
 router.get("/", async (req, res) => {
-  try {
-    const { lang = "en" } = req.query;
-    const faqs = await Faq.find();
-
-    const translatedFaqs = faqs.map(faq => ({
-      _id: faq._id,
-      question: faq.getTranslatedQuestion(lang),
-      answer: faq.answer,
-    }));
-
-    res.json(translatedFaqs);
-  } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
-  }
+  const { lang = "en" } = req.query;
+  const faqs = await Faq.find();
+  res.json(faqs.map(faq => ({ _id: faq._id, question: faq.getTranslatedQuestion(lang), answer: faq.answer })));
 });
 
-// 📌 POST - Add a new FAQ with Auto-Translation
-router.post("/", async (req, res) => {
+// 📌 Create a new FAQ (Protected)
+router.post("/", auth, async (req, res) => {
   try {
     const { question, answer } = req.body;
 
-    // Auto-translate question
     const translations = {
       en: question,
       hi: await translateText(question, "hi"),
@@ -42,8 +31,8 @@ router.post("/", async (req, res) => {
   }
 });
 
-// 📌 DELETE - Remove FAQ
-router.delete("/:id", async (req, res) => {
+// 📌 Delete FAQ (Protected)
+router.delete("/:id", auth, async (req, res) => {
   try {
     await Faq.findByIdAndDelete(req.params.id);
     res.json({ message: "FAQ deleted" });
